@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance List</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .green-button {
+        background-color: green;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .red-button {
+        background-color: red;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Attendance List</h2>
+
+    <table id="attendance-list">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>รหัสประจำตัว</th>
+          <th>ชื่อ</th>
+          <th>สัปดาห์ 1</th>
+          <th>สัปดาห์ 2</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+// ฟังก์ชันสร้าง Button
+function createButton(row, attendance, weekIndex, data) {
+  const cell = row.insertCell();
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = attendance === 1 ? "green-button" : "red-button";
+  button.textContent = attendance === 1 ? "เข้าเรียน" : "โดดเรียน";
+  button.addEventListener("click", function () {
+    if (button.classList.contains("green-button")) {
+      button.classList.remove("green-button");
+      button.classList.add("red-button");
+      button.textContent = "โดดเรียน";
+      data[row.rowIndex - 1]["สัปดาห์" + weekIndex] = null;
+    } else {
+      button.classList.remove("red-button");
+      button.classList.add("green-button");
+      button.textContent = "เข้าเรียน";
+      data[row.rowIndex - 1]["สัปดาห์" + weekIndex] = 1;
+    }
+    // เรียกใช้ฟังก์ชันบันทึกการเปลี่ยนแปลงเมื่อมีการเปลี่ยนแปลง
+    saveChanges(data);
+  });
+  cell.appendChild(button);
+}
+
+
+      // ฟังก์ชันโหลดข้อมูลจากไฟล์ JSON และแสดงบนหน้าเว็บ
+      function loadAttendanceData() {
+        fetch("student_attendance.json") // ตรงนี้ให้เปลี่ยนเส้นทางไฟล์ให้ถูกต้อง
+          .then((response) => response.json())
+          .then((data) => {
+            const tableBody = document.querySelector("#attendance-list tbody");
+            data.forEach((student, index) => {
+              const row = tableBody.insertRow();
+              row.insertCell(0).textContent = index + 1;
+              row.insertCell(1).textContent = student["รหัสประจำตัว"];
+              row.insertCell(2).textContent = student["ชื่อ"];
+              createButton(row, student["สัปดาห์1"], 1);
+              createButton(row, student["สัปดาห์2"], 2);
+            });
+          })
+          .catch((error) => console.error("Error loading the data:", error));
+      }
+
+      // เรียกใช้ฟังก์ชันเมื่อหน้าเว็บโหลดเสร็จสมบูรณ์
+      window.onload = loadAttendanceData;
+    </script>
+  </body>
+</html>
